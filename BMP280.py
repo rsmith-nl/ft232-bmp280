@@ -4,7 +4,7 @@
 # Copyright © 2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2018-04-08T22:38:40+0200
-# Last modified: 2018-04-25T01:29:31+0200
+# Last modified: 2018-04-25T01:39:04+0200
 """Code to use a BMP280 with FT232H using I²C."""
 
 from enum import IntEnum
@@ -124,9 +124,11 @@ class BMP280SPI:
     def read(self):
         """Read the sensor data from the chip and return (temperature, pressure)."""
         # Do one measurement in high resolution, forced mode.
-        self._spi.exchange([REG.CONTROL | 0x80, 0xFE])
+        self._spi.exchange([REG.CONTROL & ~0x80, 0xFE])
+        # Wait while maesurement is running
         while self._readU8(REG.STATUS) & 0x08:
             sleep(0.01)
+        # Now read and process the data.
         UT = self._readU24(REG.TEMP_MSB)
         # print("DEBUG: UT = ", UT)
         var1 = (UT / 16384.0 - self._dig_T1 / 1024.0) * self._dig_T2
