@@ -5,7 +5,7 @@
 # Copyright © 2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2018-04-22T20:56:36+0200
-# Last modified: 2018-04-25T01:45:07+0200
+# Last modified: 2018-04-25T19:06:15+0200
 """
 Monitoring program for the Bosch BMP280 temperature and pressure sensor.
 The sensor is connected to the computer via an FT232H using I²C.
@@ -58,7 +58,7 @@ def main(argv):
         while True:
             now = datetime.utcnow().strftime('%FT%TZ')
             temperature, pressure = bmp280.read()
-            line = '{} {:.1f} {:.0f}\n'.format(now, temperature, pressure)
+            line = '{} {:.2f} {:.0f}\n'.format(now, temperature, pressure)
             datafile.write(line)
             datafile.flush()
             time.sleep(args.interval)
