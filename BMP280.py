@@ -4,8 +4,11 @@
 # Copyright © 2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2018-04-08T22:38:40+0200
-# Last modified: 2018-04-25T01:39:04+0200
-"""Code to use a BMP280 with FT232H using I²C."""
+# Last modified: 2018-04-25T20:13:36+0200
+"""
+Code to use a BMP280 with FT232H using SPI.
+The SPI interface provided by pyftdi is used.
+"""
 
 from enum import IntEnum
 from time import sleep
@@ -18,11 +21,8 @@ class REG(IntEnum):
     CONTROL = 0xF4
     CONFIG = 0xF5
     TEMP_MSB = 0xFA
-    TEMP_LSB = 0xFB
-    TEMP_XLSB = 0xFC
     PRESS_MSB = 0xF7
-    PRESS_LSB = 0xF8
-    PRESS_XLSB = 0xF9
+    # Compensation coefficient registers.
     T1 = 0x88
     T2 = 0x8A
     T3 = 0x8C
