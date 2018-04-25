@@ -5,14 +5,18 @@
 # Copyright © 2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2018-04-22T20:56:36+0200
-# Last modified: 2018-04-25T19:06:15+0200
+# Last modified: 2018-04-25T20:10:16+0200
 """
 Monitoring program for the Bosch BMP280 temperature and pressure sensor.
-The sensor is connected to the computer via an FT232H using I²C.
+The sensor is connected to the computer via an FT232H using SPI.
 
+Connect 5V and ground from the FT232H to their respective pins on the BMP280.
+Then connect D0 to SCK, D1 to SDI, D2 to SDO and e.g. D3 to CS.
+You can use the -c or --cs option to choose another chip select line.
 """
 
 from datetime import datetime
+from enum import IntEnum
 import argparse
 import sys
 import time
@@ -22,6 +26,21 @@ from BMP280 import BMP280SPI
 
 
 __version__ = '1.0'
+
+
+class PORT(IntEnum):
+    # Generic names
+    ADBUS3 = 0
+    ADBUS4 = 1
+    ADBUS5 = 2
+    ADBUS6 = 3
+    ADBUS7 = 4
+    # Adafruit FT232H breakout
+    D3 = 0
+    D4 = 1
+    D5 = 2
+    D6 = 3
+    D7 = 4
 
 
 def main(argv):
@@ -37,9 +56,9 @@ def main(argv):
 
     # Connect to the sensor.
     ctrl = SpiController()
-    ctrl.configure('ftdi://ftdi:232h/1')
-    spi = ctrl.get_port(0)
-    spi.set_frequency(100000)
+    ctrl.configure('ftdi://ftdi:232h/{}'.format(args.device))
+    spi = ctrl.get_port(PORT[args.cs].value)
+    spi.set_frequency(args.prequency)
     bmp280 = BMP280SPI(spi)
 
     # Open the data file.
@@ -69,11 +88,29 @@ def main(argv):
 def process_arguments(argv):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        '-c',
+        '--cs',
+        default="D3",
+        type=str,
+        help='FT232 pin to use for SPI chip select (default D3, range D3 - D7).')
+    parser.add_argument(
+        '-d',
+        '--device',
+        default=1,
+        type=int,
+        help='FT232 device number (default 1 for FT232*, 1 or 2 for 2232*, 1-4 for 4232* devices).')
+    parser.add_argument(
+        '-f',
+        '--frequency',
+        default=100000,
+        type=int,
+        help='SPI bus requency in Hz (default 100000 Hz, must be >91 Hz and <6 MHz).')
+    parser.add_argument(
         '-i',
         '--interval',
         default=5,
         type=int,
-        help='interval between measurements (≥5 s, default 5 s)')
+        help='interval between measurements (≥5 s, default 5 s).')
     parser.add_argument(
         '-v', '--version', action='version', version=__version__)
     parser.add_argument(
@@ -83,7 +120,15 @@ def process_arguments(argv):
              r'For example "/tmp/bmp280-{}.d"')
     args = parser.parse_args(argv)
     args.path = args.path[0]
+    errormsg = None
     if not args.path or r'{}' not in args.path:
+        errormsg = r'No path given or {} not in path.'
+    elif args.cs not in PORT.__members__:
+        errormsg = 'Invalid chip select line.'
+    elif args.frequency < 92:
+        errormsg = 'Frequency must be between 92 Hz and 6 MHz.'
+    if errormsg:
+        print(errormsg + '\n')
         parser.print_help()
         sys.exit(0)
     if args.interval < 5:
