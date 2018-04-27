@@ -5,7 +5,7 @@
 # Copyright © 2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2018-04-22T20:56:36+0200
-# Last modified: 2018-04-25T20:10:16+0200
+# Last modified: 2018-04-27T13:43:13+0200
 """
 Monitoring program for the Bosch BMP280 temperature and pressure sensor.
 The sensor is connected to the computer via an FT232H using SPI.
@@ -22,13 +22,12 @@ import sys
 import time
 
 from pyftdi.spi import SpiController
-from BMP280 import BMP280SPI
-
+from bmp280 import Bmp280spi
 
 __version__ = '1.0'
 
 
-class PORT(IntEnum):
+class Port(IntEnum):
     # Generic names
     ADBUS3 = 0
     ADBUS4 = 1
@@ -57,9 +56,9 @@ def main(argv):
     # Connect to the sensor.
     ctrl = SpiController()
     ctrl.configure('ftdi://ftdi:232h/{}'.format(args.device))
-    spi = ctrl.get_port(PORT[args.cs].value)
+    spi = ctrl.get_port(Port[args.cs].value)
     spi.set_frequency(args.prequency)
-    bmp280 = BMP280SPI(spi)
+    bmp280 = Bmp280spi(spi)
 
     # Open the data file.
     datafile = open(args.path.format(now), 'w')
@@ -92,19 +91,22 @@ def process_arguments(argv):
         '--cs',
         default="D3",
         type=str,
-        help='FT232 pin to use for SPI chip select (default D3, range D3 - D7).')
+        help='FT232 pin to use for SPI chip select (default D3, range D3 - D7).'
+    )
     parser.add_argument(
         '-d',
         '--device',
         default=1,
         type=int,
-        help='FT232 device number (default 1 for FT232*, 1 or 2 for 2232*, 1-4 for 4232* devices).')
+        help='FT232 device number (default 1 for FT232*, 1 or 2 for 2232*, 1-4 for 4232* devices).'
+    )
     parser.add_argument(
         '-f',
         '--frequency',
         default=100000,
         type=int,
-        help='SPI bus requency in Hz (default 100000 Hz, must be >91 Hz and <6 MHz).')
+        help='SPI bus requency in Hz (default 100000 Hz, must be >91 Hz and <6 MHz).'
+    )
     parser.add_argument(
         '-i',
         '--interval',
@@ -117,13 +119,13 @@ def process_arguments(argv):
         'path',
         nargs=1,
         help=r'path template for the data file. Should contain {}. '
-             r'For example "/tmp/bmp280-{}.d"')
+        r'For example "/tmp/bmp280-{}.d"')
     args = parser.parse_args(argv)
     args.path = args.path[0]
     errormsg = None
     if not args.path or r'{}' not in args.path:
         errormsg = r'No path given or {} not in path.'
-    elif args.cs not in PORT.__members__:
+    elif args.cs not in Port.__members__:
         errormsg = 'Invalid chip select line.'
     elif args.frequency < 92:
         errormsg = 'Frequency must be between 92 Hz and 6 MHz.'
