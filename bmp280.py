@@ -4,10 +4,10 @@
 # Copyright © 2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2018-04-08T22:38:40+0200
-# Last modified: 2018-04-28T14:42:09+0200
+# Last modified: 2018-04-28T18:09:30+0200
 """
-Code to use a BMP280 with FT232H using SPI.
-The SPI interface provided by pyftdi is used.
+Code to use a BMP280 with FT232H using SPI or I²C connection.
+Both connections use the pyftdi API.
 """
 
 from enum import IntEnum
@@ -39,9 +39,10 @@ class Reg(IntEnum):
 
 
 class Bmp280base:
+    """Base class for BMP280."""
 
     def __init__(self):
-        """Create a Bmp280base instance. This is not meant to be instantiated.
+        """Create a Bmp280base instance. This is not meant to be instantiated directly.
         Use Bmp280spi or Bmp280i2c instead!"""
         self._temp = None
         self._press = None
@@ -167,6 +168,7 @@ class Bmp280base:
 
 
 class Bmp280spi(Bmp280base):
+    """Class to use a BMP280 over SPI."""
 
     def __init__(self, spi):
         """Create a Bmp280spi instance.
@@ -217,6 +219,7 @@ class Bmp280spi(Bmp280base):
 
 
 class Bmp280i2c(Bmp280base):
+    """Class to use a BMP280 over I²C."""
 
     def __init__(self, i2c):
         """Create a Bmp280i2c instance.
