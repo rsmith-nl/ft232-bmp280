@@ -4,7 +4,7 @@
 # Copyright © 2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2018-04-08T22:38:40+0200
-# Last modified: 2018-04-28T13:05:28+0200
+# Last modified: 2018-04-28T13:33:00+0200
 """
 Code to use a BMP280 with FT232H using SPI.
 The SPI interface provided by pyftdi is used.
@@ -182,7 +182,9 @@ class Bmp280spi(Bmp280base):
         >> spi.set_frequency(1000000)
         >> bmp280 = Bmp280spi(spi)
 
-        N.B: port 0 is D3 on the Adafruit FT232H!
+        N.B: port 0 is pin D3 on the Adafruit FT232H. Only pins D3-D7 can be
+        used as chip select! So you can connect at most 5 spi devices to the
+        FT232H.
         """
         self._spi = spi
         super(Bmp280spi, self).__init__()
@@ -210,5 +212,54 @@ class Bmp280spi(Bmp280base):
     def _readU24(self, register):
         """Read the 2.5 byte temperature or pressure registers."""
         data = self._spi.exchange([register | 0x80], 3)
+        rv = float((data[0] << 16 | data[1] << 8 | data[2]) >> 4)
+        return rv
+
+
+class Bmp280i2c(Bmp280base):
+
+    def __init__(self, i2c):
+        """Create a Bmp280i2c instance.
+
+        Arguments:
+            i2c: i2cPort.
+
+        >> from pyftdi.i2c import i2cController
+        >> from bmp280 import Bmp280i2c
+        >> ctrl = i2cController()
+        >> ctrl.configure('ftdi://ftdi:232h/1')
+        >> i2c = ctrl.get_port(0x77)
+        >> bmp280 = Bmp280i2c(i2c)
+
+        N.B: On the Adafruit breakout board, SDO is pulled high by default.
+        So the default I²C address is 0x77. The port address will be 0x76
+        if SDO is pulled low.
+        """
+        self._i2c = i2c
+        super(Bmp280i2c, self).__init__()
+
+    def _forcedmode(self):
+        """Set the sensor to forced mode."""
+        self._i2c.write_to(Reg.CONTROL & ~0x80, b'\xfe')
+
+    def _readU8(self, register):
+        """Read an unsigned byte from the specified register"""
+        return self._i2c.read_from(register | 0x80, 1)[0]
+
+    def _readU16(self, register):
+        """Read an unsigned short from the specified register"""
+        data = self._i2c.read_from(register | 0x80, 2)
+        return data[1] << 8 | data[0]
+
+    def _readS16(self, register):
+        """Read an unsigned short from the specified register"""
+        result = self._readU16(register)
+        if result > 32767:
+            result -= 65536
+        return result
+
+    def _readU24(self, register):
+        """Read the 2.5 byte temperature or pressure registers."""
+        data = self._i2c.read_from(register | 0x80, 3)
         rv = float((data[0] << 16 | data[1] << 8 | data[2]) >> 4)
         return rv
