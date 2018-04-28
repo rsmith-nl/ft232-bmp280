@@ -4,7 +4,7 @@
 # Copyright © 2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2018-04-08T22:38:40+0200
-# Last modified: 2018-04-28T13:33:00+0200
+# Last modified: 2018-04-28T14:42:09+0200
 """
 Code to use a BMP280 with FT232H using SPI.
 The SPI interface provided by pyftdi is used.
@@ -224,9 +224,9 @@ class Bmp280i2c(Bmp280base):
         Arguments:
             i2c: i2cPort.
 
-        >> from pyftdi.i2c import i2cController
+        >> from pyftdi.i2c import I2cController
         >> from bmp280 import Bmp280i2c
-        >> ctrl = i2cController()
+        >> ctrl = I2cController()
         >> ctrl.configure('ftdi://ftdi:232h/1')
         >> i2c = ctrl.get_port(0x77)
         >> bmp280 = Bmp280i2c(i2c)
@@ -240,15 +240,15 @@ class Bmp280i2c(Bmp280base):
 
     def _forcedmode(self):
         """Set the sensor to forced mode."""
-        self._i2c.write_to(Reg.CONTROL & ~0x80, b'\xfe')
+        self._i2c.write_to(Reg.CONTROL, b'\xfe')
 
     def _readU8(self, register):
         """Read an unsigned byte from the specified register"""
-        return self._i2c.read_from(register | 0x80, 1)[0]
+        return self._i2c.read_from(register, 1)[0]
 
     def _readU16(self, register):
         """Read an unsigned short from the specified register"""
-        data = self._i2c.read_from(register | 0x80, 2)
+        data = self._i2c.read_from(register, 2)
         return data[1] << 8 | data[0]
 
     def _readS16(self, register):
@@ -260,6 +260,6 @@ class Bmp280i2c(Bmp280base):
 
     def _readU24(self, register):
         """Read the 2.5 byte temperature or pressure registers."""
-        data = self._i2c.read_from(register | 0x80, 3)
+        data = self._i2c.read_from(register, 3)
         rv = float((data[0] << 16 | data[1] << 8 | data[2]) >> 4)
         return rv
