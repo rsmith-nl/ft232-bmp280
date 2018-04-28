@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-# file: bmp280-monitor.py
+# file: bmp280-monitor-spi.py
 # vim:fileencoding=utf-8:fdm=marker:ft=python
 #
 # Copyright © 2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2018-04-22T20:56:36+0200
-# Last modified: 2018-04-28T08:41:02+0200
+# Last modified: 2018-04-28T14:49:05+0200
 """
 Monitoring program for the Bosch BMP280 temperature and pressure sensor.
 The sensor is connected to the computer via an FT232H using SPI.
