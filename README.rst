@@ -5,7 +5,7 @@ Reading temperature and pressure with a BMP280 and an FT232H
 :tags: BMP280, FT232H, Python3
 :author: Roland Smith
 
-.. Last modified: 2018-04-29T11:58:13+0200
+.. Last modified: 2018-04-29T15:22:06+0200
 
 
 Introduction
@@ -30,6 +30,10 @@ the data from the sensor at a configurable interval and write it to a file.
 
 The datasheet for the sensor, the Bosch code on github and the Adafruit
 CircuitPython were used as references in writing this code.
+
+This software has been written for Python 3 on the FreeBSD operating system.
+I expect it will work on other POSIX systems, and maybe even on ms-windows.
+But I haven't tested that.
 
 
 Wiring the BMP280
