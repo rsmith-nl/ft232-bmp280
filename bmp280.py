@@ -146,8 +146,7 @@ class Bmp280base:
         # print("DEBUG: var2 = ", var2)
         var2 = var2 / 4.0 + self._dig_P4 * 65536.0
         # print("DEBUG: var2 = ", var2)
-        var1 = (self._dig_P3 * var1 * var1 / 534288.0 + self._dig_P2 * var1
-                ) / 534288.0
+        var1 = (self._dig_P3 * var1 * var1 / 534288.0 + self._dig_P2 * var1) / 534288.0
         # print("DEBUG: var1 = ", var1)
         var1 = (1.0 + var1 / 32768.0) * self._dig_P1
         # print("DEBUG: var1 = ", var1)
