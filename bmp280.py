@@ -16,6 +16,7 @@ from time import sleep
 
 class Reg(IntEnum):
     """Registers of the BMP280."""
+
     ID = 0xD0
     ID_VAL = 0x58  # Contents of the ID register for a BMP280.
     STATUS = 0xF3
@@ -48,7 +49,7 @@ class Bmp280base:
         self._press = None
         # Check if BMP280
         if self._readU8(Reg.ID) != Reg.ID_VAL:
-            raise RuntimeError('Not a BMP280')
+            raise RuntimeError("Not a BMP280")
         # Read the compensation coefficients. I'm reading the coefficients
         # separately because reading them in one go failed.
         self._dig_T1 = float(self._readU16(Reg.T1))
@@ -87,18 +88,18 @@ class Bmp280base:
     def comp(self):
         """Return the compensation coefficients as a dict."""
         return {
-            'dig_T1': self._dig_T1,
-            'dig_T2': self._dig_T2,
-            'dig_T3': self._dig_T3,
-            'dig_P1': self._dig_P1,
-            'dig_P2': self._dig_P2,
-            'dig_P3': self._dig_P3,
-            'dig_P4': self._dig_P4,
-            'dig_P5': self._dig_P5,
-            'dig_P6': self._dig_P6,
-            'dig_P7': self._dig_P7,
-            'dig_P8': self._dig_P8,
-            'dig_P9': self._dig_P9
+            "dig_T1": self._dig_T1,
+            "dig_T2": self._dig_T2,
+            "dig_T3": self._dig_T3,
+            "dig_P1": self._dig_P1,
+            "dig_P2": self._dig_P2,
+            "dig_P3": self._dig_P3,
+            "dig_P4": self._dig_P4,
+            "dig_P5": self._dig_P5,
+            "dig_P6": self._dig_P6,
+            "dig_P7": self._dig_P7,
+            "dig_P8": self._dig_P8,
+            "dig_P9": self._dig_P9,
         }
 
     @property
@@ -128,8 +129,10 @@ class Bmp280base:
         # print("DEBUG: UT = ", UT)
         var1 = (UT / 16384.0 - self._dig_T1 / 1024.0) * self._dig_T2
         # print("DEBUG: var1 = ", var1)
-        var2 = ((UT / 131072.0 - self._dig_T1 / 8192.0) *
-                (UT / 131072.0 - self._dig_T1 / 8192.0)) * self._dig_T3
+        var2 = (
+            (UT / 131072.0 - self._dig_T1 / 8192.0)
+            * (UT / 131072.0 - self._dig_T1 / 8192.0)
+        ) * self._dig_T3
         # print("DEBUG: var2 = ", var2)
         t_fine = int(var1 + var2)
         # print("DEBUG: t_fine = ", t_fine)
@@ -242,7 +245,7 @@ class Bmp280i2c(Bmp280base):
 
     def _forcedmode(self):
         """Set the sensor to forced mode."""
-        self._i2c.write_to(Reg.CONTROL, b'\xfe')
+        self._i2c.write_to(Reg.CONTROL, b"\xfe")
 
     def _readU8(self, register):
         """Read an unsigned byte from the specified register"""
